@@ -2,8 +2,18 @@ import re
 import requests
 
 def extract_github_url(text):
-    match = re.search(r'https?://github\.com/\S+', text)
-    return match.group(0) if match else None
+    # Updated pattern to match both https://github.com and github.com
+    pattern = r'(?:https?://)?(?:www\.)?github\.com/\S+'
+    match = re.search(pattern, text, re.IGNORECASE)
+    
+    if match:
+        url = match.group(0)
+        # Add https:// if not present
+        if not url.startswith(('http://', 'https://')):
+            url = 'https://' + url
+        return url
+    
+    return None
 
 def get_github_activity(username):
     url = f"https://api.github.com/users/{username}/events"
