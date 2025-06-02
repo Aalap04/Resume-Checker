@@ -10,6 +10,30 @@ from datetime import datetime, timedelta
 
 load_dotenv()
 
+def get_github_token():
+    """Get GitHub token from environment or Streamlit secrets"""
+    # Try environment variable first (for local development)
+    token = os.getenv('GITHUB_TOKEN')
+    
+    # If not found, try Streamlit secrets (for cloud deployment)
+    if not token:
+        try:
+            token = st.secrets['GITHUB_TOKEN']
+        except:
+            pass
+    
+    return token
+
+github_token = get_github_token()
+
+st.write("🔧 Debug Info:")
+if github_token:
+    st.write("✅ GitHub token found")
+    st.write(f"🔑 Token length: {len(github_token)} characters")
+else:
+    st.write("❌ No GitHub token found")
+    st.write("Please check your Streamlit secrets configuration")
+
 def fetch_github_contributions(username, token=None):
     """Fetch GitHub contribution data for heatmap"""
     try:
