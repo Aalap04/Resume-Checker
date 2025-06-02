@@ -7,3 +7,6 @@ openai
 requests
 scikit-learn
 python-dotenv
+PyPDF2
+plotly
+pandas
