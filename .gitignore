@@ -1,0 +1,18 @@
+venv/
+__pycache__/
+*.pyc
+.env
+# Virtual environments
+venv/
+env/
+ENV/
+
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.dylib
+
+# OS
+.DS_Store
+Thumbs.db
