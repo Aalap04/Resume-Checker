@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 load_dotenv()
 
 def fetch_github_contributions(username, token=None):
-    """Fetch GitHub contribution data for heatmap"""
+
     try:
         headers = {
             'Accept': 'application/vnd.github.v3+json',
@@ -45,7 +45,7 @@ def fetch_github_contributions(username, token=None):
         return None
 
 def process_events_for_heatmap(events):
-    """Process GitHub events into heatmap data"""
+    
     if not events:
         st.info("ℹ️ No GitHub events found")
         return {}
@@ -119,7 +119,7 @@ def create_github_heatmap(activity_data, username):
             customdata=df['date'].dt.strftime('%d/%m/%Y'),
         ))
         
-        # ✅ Fixed: Get unique months in chronological order from the data
+        
         unique_months = df.sort_values('date')['month_year'].unique()
         
         fig.update_layout(
@@ -130,8 +130,8 @@ def create_github_heatmap(activity_data, username):
             margin=dict(l=0, r=0, t=40, b=0),
             xaxis=dict(
                 categoryorder='array',
-                categoryarray=list(unique_months),  # ✅ Use actual chronological order
-                tickangle=45  # Rotate month names for better readability
+                categoryarray=list(unique_months),  
+                tickangle=45  
             ),
             yaxis=dict(
                 tickmode='array',
@@ -147,11 +147,11 @@ def create_github_heatmap(activity_data, username):
         return None
 
 def create_simple_github_stats(username):
-    """Fallback GitHub stats visualization"""
+    
     try:
         st.markdown("#### 📈 GitHub Activity (Fallback)")
         
-        # Try different GitHub stat services
+        
         services = [
             f"https://ghchart.rshah.org/{username}",
             f"https://github-readme-streak-stats.herokuapp.com/?user={username}&theme=default"
@@ -170,7 +170,7 @@ def create_simple_github_stats(username):
         st.error(f"Could not load GitHub stats: {e}")
         return False
 
-# Page configuration
+
 st.set_page_config(
     page_title="Resume Checker - AI-Powered Resume Analysis", 
     layout="centered",
@@ -180,14 +180,14 @@ st.set_page_config(
 
 col1, col2, col3 = st.columns([1, 2, 1])
 
-# Header
+
 with col2:
     st.title("Resume Checker") 
     
 st.subheader("**Is your Resume Good Enough?**")
 st.markdown("*A free and fast AI resume checker doing crucial checks to ensure your resume is ready to perform and get you interview callbacks.*")
 
-# File upload section
+
 col1, col2 = st.columns(2)
 
 with col1:
@@ -206,14 +206,14 @@ with col2:
         help="Upload your resume in PDF format"
     )
 
-# Validation and processing
+
 if st.button("🚀 Analyze Resume", type="primary", use_container_width=True):
     if not job_file or not resume_file:
         st.error("⚠️ Please upload both Job Description and Resume files.")
     else:
         try:
             with st.spinner("🔍 Analyzing documents..."):
-                # Create temporary files
+                
                 with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_job:
                     temp_job.write(job_file.read())
                     job_path = temp_job.name
@@ -222,21 +222,21 @@ if st.button("🚀 Analyze Resume", type="primary", use_container_width=True):
                     temp_resume.write(resume_file.read())
                     resume_path = temp_resume.name
 
-                # Process files
+                
                 result = process_resume(resume_path, job_path)
 
                 # Clean up temporary files
                 os.unlink(job_path)
                 os.unlink(resume_path)
             
-            # Display results
+            
             st.success("✅ Analysis complete!")
             
-            # Score section
+            
             st.markdown("### 📊 Compatibility Score")
             score = result["match_score"]
             
-            # Color-coded progress bar
+            
             if score >= 80:
                 color = "green"
                 emoji = "🟢"
@@ -273,7 +273,7 @@ if st.button("🚀 Analyze Resume", type="primary", use_container_width=True):
                 else:
                     st.write("No specific skills extracted")
 
-            # GitHub analysis with heatmap
+            
             st.markdown("### 🐙 GitHub Profile Analysis")
             github_profile = result.get("github_profile")
             
@@ -286,7 +286,7 @@ if st.button("🚀 Analyze Resume", type="primary", use_container_width=True):
                 else:
                     st.metric("Public Events", gh_data.get("public_events", 0))
                 
-                # Add GitHub Heatmap
+                
                 username = github_profile.split('/')[-1] if github_profile.endswith('/') else github_profile.split('/')[-1]
                 st.write(f"🔍 Extracted username: {username}")
                 
@@ -310,7 +310,7 @@ if st.button("🚀 Analyze Resume", type="primary", use_container_width=True):
             else:
                 st.info("ℹ️ No GitHub profile found in resume")
 
-            # Recommendations section
+            
             if hasattr(result, 'recommendations') and result.get('recommendations'):
                 st.markdown("### 💡 Recommendations")
                 for rec in result['recommendations']:
@@ -320,7 +320,7 @@ if st.button("🚀 Analyze Resume", type="primary", use_container_width=True):
             st.error(f"❌ An error occurred while processing: {str(e)}")
             st.write("Please check your files and try again.")
 
-# Information section
+
 with st.expander("ℹ️ How it works"):
     st.markdown("""
     1. **Upload Documents**: Provide both job description and resume in PDF format
@@ -330,6 +330,6 @@ with st.expander("ℹ️ How it works"):
     5. **GitHub Integration**: Automatic detection and analysis of GitHub profiles with activity heatmap
     """)
 
-# Footer
+
 st.markdown("---")
 st.caption("Built with ❤️ using Streamlit • Powered by AI")
