@@ -8,6 +8,14 @@ import pandas as pd
 import plotly.graph_objects as go
 from datetime import datetime, timedelta
 
+# ✅ MUST BE FIRST - Move st.set_page_config() here immediately after imports
+st.set_page_config(
+    page_title="Resume Checker - AI-Powered Resume Analysis", 
+    layout="centered",
+    page_icon="📄",
+    initial_sidebar_state="collapsed"
+)
+
 load_dotenv()
 
 def get_github_token():
@@ -23,16 +31,6 @@ def get_github_token():
             pass
     
     return token
-
-github_token = get_github_token()
-
-st.write("🔧 Debug Info:")
-if github_token:
-    st.write("✅ GitHub token found")
-    st.write(f"🔑 Token length: {len(github_token)} characters")
-else:
-    st.write("❌ No GitHub token found")
-    st.write("Please check your Streamlit secrets configuration")
 
 def fetch_github_contributions(username, token=None):
     """Fetch GitHub contribution data for heatmap"""
@@ -119,7 +117,7 @@ def create_github_heatmap(activity_data, username):
                 'day': date.strftime('%A'),
                 'week': date.isocalendar()[1],
                 'month': date.strftime('%B'),
-                'month_year': date.strftime('%B %Y'),  # ✅ Added: Month with year
+                'month_year': date.strftime('%B %Y'),
                 'day_of_month': date.day,
                 'count': count
             })
@@ -128,7 +126,7 @@ def create_github_heatmap(activity_data, username):
         
         # Create the heatmap using month_year for proper chronological order
         fig = go.Figure(data=go.Heatmap(
-            x=df['month_year'],  # ✅ Changed: Use month with year for proper ordering
+            x=df['month_year'],
             y=df['day_of_month'],
             z=df['count'],
             colorscale=[
@@ -143,7 +141,7 @@ def create_github_heatmap(activity_data, username):
             customdata=df['date'].dt.strftime('%d/%m/%Y'),
         ))
         
-        # ✅ Fixed: Get unique months in chronological order from the data
+        # Get unique months in chronological order from the data
         unique_months = df.sort_values('date')['month_year'].unique()
         
         fig.update_layout(
@@ -154,8 +152,8 @@ def create_github_heatmap(activity_data, username):
             margin=dict(l=0, r=0, t=40, b=0),
             xaxis=dict(
                 categoryorder='array',
-                categoryarray=list(unique_months),  # ✅ Use actual chronological order
-                tickangle=45  # Rotate month names for better readability
+                categoryarray=list(unique_months),
+                tickangle=45
             ),
             yaxis=dict(
                 tickmode='array',
@@ -194,22 +192,24 @@ def create_simple_github_stats(username):
         st.error(f"Could not load GitHub stats: {e}")
         return False
 
-# Page configuration
-st.set_page_config(
-    page_title="Resume Checker - AI-Powered Resume Analysis", 
-    layout="centered",
-    page_icon="📄",
-    initial_sidebar_state="collapsed"
-)
-
+# Header
 col1, col2, col3 = st.columns([1, 2, 1])
 
-# Header
 with col2:
     st.title("Resume Checker") 
     
 st.subheader("**Is your Resume Good Enough?**")
 st.markdown("*A free and fast AI resume checker doing crucial checks to ensure your resume is ready to perform and get you interview callbacks.*")
+
+# Debug info (remove this after testing)
+st.write("🔧 Debug Info:")
+github_token = get_github_token()
+if github_token:
+    st.write("✅ GitHub token found")
+    st.write(f"🔑 Token length: {len(github_token)} characters")
+else:
+    st.write("❌ No GitHub token found")
+    st.write("Please check your Streamlit secrets configuration")
 
 # File upload section
 col1, col2 = st.columns(2)
@@ -314,7 +314,8 @@ if st.button("🚀 Analyze Resume", type="primary", use_container_width=True):
                 username = github_profile.split('/')[-1] if github_profile.endswith('/') else github_profile.split('/')[-1]
                 st.write(f"🔍 Extracted username: {username}")
                 
-                github_token = os.getenv('GITHUB_TOKEN')
+                # ✅ Use the consistent token retrieval function
+                github_token = get_github_token()
                 
                 with st.spinner("Loading GitHub activity heatmap..."):
                     activity_data = fetch_github_contributions(username, github_token)
